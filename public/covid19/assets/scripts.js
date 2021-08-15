@@ -17,6 +17,7 @@ const getCovid = (() => {
 })();
 
 const getCountry = ((country) => {
+    console.log(country);
     const url = `http://localhost:3000/api/countries/${country}`; // para obtener esta información debes llamar a la API http://localhost:3000/api/countries/{country} 
     try {
         const covidCountry = async () => {
@@ -31,14 +32,14 @@ const getCountry = ((country) => {
     }
 });
 
-// buscar valores mayores a buscar
+// Desplegar la información de la API en un gráfico de barra que debe mostrar sólo los países con más de 10000 casos activos
 const llenarCovid = async (buscar) => {
     const covid = await getCovid();
-    console.log(covid.data);
+    //    console.log(covid.data);
     const resultado = covid.data
         .filter((a) => a.confirmed >= buscar) // buscar mayores al valoR de buscar
         .forEach((a) => {   // recorrer el nuevo arreglo para crear los datos del canvasjs
-            console.log(a);
+            //    console.log(a);
             // {location: "US", confirmed: 36306724, deaths: 619093, recovered: 0, active: 0}active: 0confirmed: 36306724deaths: 619093location: "US"recovered: 0[[Prototype]]: Object
             let confirmados = {
                 label: a.location,
@@ -62,8 +63,6 @@ const llenarCovid = async (buscar) => {
     // console.log(dataConfirmados);
     // console.log(dataMuertos);
     // console.log(dataRecuperados); // recuperados siempre da 0 en el api   !!!!!!!
-
-
 
     var chart = new CanvasJS.Chart("chartContainer", {
         animationEnabled: true,
@@ -121,56 +120,78 @@ const llenarCovid = async (buscar) => {
         chart.render();
     }
 
+    // {location: "US", confirmed: 36306724, deaths: 619093, recovered: 0, active: 0}active: 0confirmed: 36306724deaths: 619093location: "US"recovered: 0[[Prototype]]: Object
+    //  console.log(covid.data);
+    $('#tabla').DataTable({
+        "data": covid.data,
+        columns: [
+            { data: "location" },
+            { data: "confirmed" },
+            { data: "deaths" },
+            { data: "recovered." },
+            { data: "active" },
+        ]
+    });
+    var table = $('#tabla').DataTable();
+    $('#tabla tbody').on('click', 'tr', function () {
+        var data = table.row(this).data();
+        //    console.log(data);
 
+        let pais = data.location;
+        //console.log("entramos en js");
+        modalGrafico(pais);
+
+
+      //  alert('You clicked on ' + data.location + '\'s row');
+    });
 
 };
 
+let modalGrafico = (async (pais) => {
+    const covidPais = await getCountry(pais);
+    console.log(covidPais.data);
+
+    // {location: "US", confirmed: 36306724, deaths: 619093, recovered: 0, active: 0}active: 0confirmed: 36306724deaths: 619093location: "US"recovered: 0[[Prototype]]: Object
+
+    var chart2 = new CanvasJS.Chart("chartContainer2", {
+        theme: "light1", // "light2", "dark1", "dark2"
+        animationEnabled: false, // change to true		
+        title: {
+            text: `resumen ${covidPais.data.location}`
+        },
+        data: [
+            {
+                type: "column",
+                dataPoints: [
+                    { label: "Confirmados", y: covidPais.data.confirmed },
+                    { label: "Muertos", y: covidPais.data.deaths },
+                    { label: "Recuperados", y: covidPais.data.recovered },
+                    { label: "Activos ", y: covidPais.data.active }
+                ]
+            }
+        ]
+    });
+    chart2.render();
+    $("#exampleModal").modal("toggle");
+});
+
 
 // main 
-let pais = "Brazil";
-//console.log("entramos en js");
-//console.log(getCountry(pais));
+
 var dataConfirmados = [];
-    var dataMuertos = [];
-    var dataRecuperados = [];
-    llenarCovid(100000);
+var dataMuertos = [];
+var dataRecuperados = [];
+llenarCovid(10000); // Desplegar la información de la API en un gráfico de barra que debe mostrar sólo los países con más de 10000 casos activos
 
 // $("#exampleModal").modal("toggle");  // modal
 
-console.log(dataConfirmados)
-window.onload = function () {
-    
-    
-
-}
 
 
 
 
 
 
-/**
-    console.log(getCovid());
-    getCovid.forEach((number) => {
-        if (number[1] != "null") {
-          let dato = {
-            y: number[1],
-            label: number[0]
-          };
-          dataPoints.push(dato);
-          contador++;
-        }
 
-      });
-  */
-      // function addData(getCovid) {
-    //     for (var i = 0; i < data.length; i++) {
-    //         dataPoints.push({
-    //             x: new Date(data[i].date),
-    //             y: data[i].units
-    //         });
-    //     }
-    //     $("#chartContainer").CanvasJSChart(options);
 
-    // }
+
 
