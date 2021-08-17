@@ -1,6 +1,82 @@
 
-// funciones
+localStorage.setItem('esta-mi-llave', 'valor-asignado')
 
+// funciones de hito2
+const apiLogin = async (email2, password2) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email2,
+                password: password2
+            })
+        });
+        const { token } = await response.json(); // Obtener el JWT a través del formulario de login entregado.
+        // console.log(token);
+        localStorage.setItem('my-token', token); //Persistir el token utilizando localStorage.
+        return token;
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+/** 5. Al hacer click en la opción Situación Chile, se debe llamar a las siguientes APIs */
+const getConfirmados = async (jwt) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/confirmed', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        });
+
+        const { data } = await response.json()
+
+        return data
+
+    } catch (error) {
+
+    }
+}
+
+const getMuertos = async (jwt) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/deaths', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        });
+
+        const { data } = await response.json()
+
+        return data
+
+    } catch (error) {
+
+    }
+}
+
+const getRecuperados = async (jwt) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/recovered', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${jwt}`
+            }
+        });
+
+        const { data } = await response.json()
+
+        return data
+
+    } catch (error) {
+
+    }
+}
+
+// Funciones de hito1
 const getCovid = (() => {
     const url = 'http://localhost:3000/api/total'; // Consumir la API http://localhost:3000/api/total con JavaScript o jQuery
     try {
@@ -181,9 +257,71 @@ let modalGrafico = (async (pais) => {
 var dataConfirmados = [];
 var dataMuertos = [];
 var dataRecuperados = [];
+const formulario = document.getElementById("formulario");
+const inicio = document.getElementById("inicio");
+const chile = document.getElementById("chile");
+const contenidoWeb = document.getElementById("contenidoWeb");
 llenarCovid(10000); // Desplegar la información de la API en un gráfico de barra que debe mostrar sólo los países con más de 10000 casos activos
 
-// $("#exampleModal").modal("toggle");  // modal
+inicio.addEventListener('click', () => {
+    if (inicio.innerHTML == 'Cerrar sesión') {
+        localStorage.clear(); // elimina el JWT almacenado.
+        location.reload(true); // Recarga pagina
+    } else {
+        $('#modalLogin').modal('toggle') // hace visible el modal con el login
+    }
+
+
+})
+
+formulario.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    let email = formulario.email.value;
+    let password = formulario.password.value;
+
+
+    token = await apiLogin(email, password);
+    console.log(token);
+
+    if (token) {   // si existe el JWT se ejecuta todo lo que esta dentro del if
+        $('#modalLogin').modal('toggle'); // Oculta el modal
+        inicio.innerHTML = 'Cerrar sesión'  // cambiar el nombre a Cerrar sesion 
+        chile.style.display = "block"; // hace visible el link a Situación Chile..
+
+        
+
+
+    } else {
+        alert("usuario o contraseña invalido")
+
+    }
+
+});
+
+
+chile.addEventListener('click', async() => {
+console.log("entramos en Chile esperar la carga de los datos de chile demora algunos segundos");
+contenidoWeb.innerHTML = ""; // limpiar pagina para contenido de situacion Chile
+
+/** 
+         5. Al hacer click en la opción Situación Chile, se debe llamar a las siguientes APIs.
+        http://localhost:3000/api/confirmed
+        http://localhost:3000/api/deaths
+        http://localhost:3000/api/recovered
+         */
+        const covidConfirmados = await getConfirmados(token);
+        const covidMuertos = await getMuertos(token);
+        const covidRecuperados = await getRecuperados(token);
+
+        console.log(covidConfirmados);
+        console.log(covidMuertos);
+        console.log(covidRecuperados);
+
+});
+
+
+
+
 
 
 
