@@ -218,7 +218,7 @@ const llenarCovid = async (buscar) => {
         modalGrafico(pais);
 
 
-      //  alert('You clicked on ' + data.location + '\'s row');
+        //  alert('You clicked on ' + data.location + '\'s row');
     });
 
 };
@@ -257,6 +257,10 @@ let modalGrafico = (async (pais) => {
 var dataConfirmados = [];
 var dataMuertos = [];
 var dataRecuperados = [];
+var covidConfirmadosArray = [];
+var covidMuertosArray = [];
+var covidRecuperadosArray = [];
+
 const formulario = document.getElementById("formulario");
 const inicio = document.getElementById("inicio");
 const chile = document.getElementById("chile");
@@ -288,7 +292,7 @@ formulario.addEventListener('submit', async (e) => {
         inicio.innerHTML = 'Cerrar sesión'  // cambiar el nombre a Cerrar sesion 
         chile.style.display = "block"; // hace visible el link a Situación Chile..
 
-        
+
 
 
     } else {
@@ -299,23 +303,103 @@ formulario.addEventListener('submit', async (e) => {
 });
 
 
-chile.addEventListener('click', async() => {
-console.log("entramos en Chile esperar la carga de los datos de chile demora algunos segundos");
-contenidoWeb.innerHTML = ""; // limpiar pagina para contenido de situacion Chile
+chile.addEventListener('click', async () => {
+    console.log("entramos en Chile esperar la carga de los datos de chile demora algunos segundos");
+    contenidoWeb.innerHTML = ""; // limpiar pagina para contenido de situacion Chile
 
-/** 
-         5. Al hacer click en la opción Situación Chile, se debe llamar a las siguientes APIs.
-        http://localhost:3000/api/confirmed
-        http://localhost:3000/api/deaths
-        http://localhost:3000/api/recovered
-         */
-        const covidConfirmados = await getConfirmados(token);
-        const covidMuertos = await getMuertos(token);
-        const covidRecuperados = await getRecuperados(token);
+    /** 
+             5. Al hacer click en la opción Situación Chile, se debe llamar a las siguientes APIs.
+            http://localhost:3000/api/confirmed
+            http://localhost:3000/api/deaths
+            http://localhost:3000/api/recovered
+             */
+    const covidConfirmados = await getConfirmados(token);
+    const covidMuertos = await getMuertos(token);
+    const covidRecuperados = await getRecuperados(token);
 
-        console.log(covidConfirmados);
-        console.log(covidMuertos);
-        console.log(covidRecuperados);
+    //  console.log(covidConfirmados);
+    //  console.log(covidMuertos);
+    //  console.log(covidRecuperados);
+
+    //   0: {date: "1/22/20", total: 0}
+    covidConfirmados.forEach((a) => {   // recorrer el nuevo arreglo para crear los datos del canvasjs
+        //    console.log(a);
+        let confirmados = {
+            label: a.date,
+            y: a.total
+        };
+        covidConfirmadosArray.push(confirmados);
+    });
+
+    covidMuertos.forEach((a) => {   // recorrer el nuevo arreglo para crear los datos del canvasjs
+        //    console.log(a);
+        let muertos = {
+            label: a.date,
+            y: a.total
+        };
+        covidMuertosArray.push(muertos);
+    });
+
+
+    covidRecuperados.forEach((a) => {   // recorrer el nuevo arreglo para crear los datos del canvasjs
+        //    console.log(a);
+        let recuperados = {
+            label: a.date,
+            y: a.total
+        };
+        covidRecuperadosArray.push(recuperados);
+    });
+
+
+    //  console.log(covidConfirmadosArray);
+    var chart = new CanvasJS.Chart("contenidoWeb", {
+        animationEnabled: true,
+        title: {
+            text: "Situacion Chile"
+        },
+        axisY: {
+            title: "Infectados"
+            //            valueFormatString: "#0,.",
+            //          suffix: "k"
+        },
+        axisX: {
+            title: "Fecha"
+        },
+        toolTip: {
+            shared: true
+        },
+        data: [{
+            type: "line",
+            showInLegend: true,
+            // toolTipContent: "<span style=\"color:#4F81BC\"><strong>{name}: </strong></span> {y}",
+            name: "infectados",
+            color: "#F08080",
+            dataPoints: covidConfirmadosArray
+        },
+        {
+            type: "line",
+            name: "Muertos",
+            // toolTipContent: "<span style=\"color:#C0504E\"><strong>{name}: </strong></span> {y}<br><b>Total:<b> #total",
+            showInLegend: true,
+            color: "red",
+            dataPoints: covidMuertosArray
+        },
+        {
+            type: "line",
+            name: "Recuperados",
+            // toolTipContent: "<span style=\"color:#C0504E\"><strong>{name}: </strong></span> {y}<br><b>Total:<b> #total",
+            showInLegend: true,
+            color: "green",
+            dataPoints: covidRecuperadosArray
+        }
+        ]
+    });
+    chart.render();
+
+
+
+
+
 
 });
 
