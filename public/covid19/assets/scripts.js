@@ -305,7 +305,7 @@ formulario.addEventListener('submit', async (e) => {
 
 chile.addEventListener('click', async () => {
     console.log("entramos en Chile esperar la carga de los datos de chile demora algunos segundos");
-    contenidoWeb.innerHTML = ""; // limpiar pagina para contenido de situacion Chile
+    contenidoWeb.innerHTML = '<img src="./assets/img/progress.gif" width="50%" alt="cargando">'; // limpiar pagina y pone foto esperando la carga
 
     /** 
              5. Al hacer click en la opción Situación Chile, se debe llamar a las siguientes APIs.
